@@ -21,7 +21,7 @@ final class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static ?string $navigationLabel = 'Users';
-    protected static \UnitEnum|string|null $navigationGroup = 'Access Control';
+    protected static \UnitEnum|string|null $navigationGroup = 'Access';
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
 
     public static function form(Schema $schema): Schema

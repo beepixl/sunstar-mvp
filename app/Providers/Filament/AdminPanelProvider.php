@@ -32,12 +32,26 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->registration()
+            ->maxContentWidth('full')
             ->colors([
-                'primary' => Color::Blue[600],
+                'primary' => [
+                    50 => 'oklch(65% 0.16 255)',
+                    100 => 'oklch(60% 0.16 255)',
+                    200 => 'oklch(55% 0.16 255)',
+                    300 => 'oklch(50% 0.16 255)',
+                    400 => 'oklch(45% 0.16 255)',
+                    500 => 'oklch(40% 0.16 255)',
+                    600 => 'oklch(35% 0.16 255)',
+                    700 => 'oklch(30% 0.16 255)',
+                    800 => 'oklch(25% 0.16 255)',
+                    900 => 'oklch(20% 0.16 255)',
+                    950 => 'oklch(15% 0.16 255)',
+                ],
             ])
             ->brandLogo(asset('images/logo.png'))
           
            ->brandLogoHeight('4rem')
+           ->sidebarWidth('180px')
            
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -46,8 +60,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                // AccountWidget::class,
+                // FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

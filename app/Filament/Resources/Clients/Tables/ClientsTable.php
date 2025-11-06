@@ -19,10 +19,18 @@ class ClientsTable
                 TextColumn::make('business_name')->label('Business Name')->searchable(),
                 TextColumn::make('email')->label('Email')->searchable(),
                 TextColumn::make('preferred_city')->label('Preferred City')->searchable(),
-                TextColumn::make('credit_limit')->label('Credit Limit')->numeric(),
-                TextColumn::make('open_balance')->label('Open Balance')->numeric(),
-                TextColumn::make('available_credit')->label('Available Credit')->numeric(),
-                TextColumn::make('total_order_amount')->label('Total Order Amount')->numeric(),
+                TextColumn::make('credit_limit')
+                    ->label('Credit Limit')
+                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
+                TextColumn::make('open_balance')
+                    ->label('Open Balance')
+                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
+                TextColumn::make('available_credit')
+                    ->label('Available Credit')
+                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
+                TextColumn::make('total_order_amount')
+                    ->label('Total Order Amount')
+                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
                 TextColumn::make('tax_exempt')->label('Tax Exempt'),
                 TextColumn::make('rewards')->label('Rewards')->numeric(),
             ])

@@ -34,17 +34,17 @@ final class CreditSummaryWidget extends BaseWidget
         $netCredits = $creditsAdded - $creditsDeducted;
 
         return [
-            Stat::make('Credits Added (This Month)', '₹' . number_format($creditsAdded, 2))
+            Stat::make('Credits Added (This Month)', '$' . number_format($creditsAdded, 2))
                 ->description('All added credits this month')
                 ->descriptionIcon('heroicon-o-arrow-up-circle')
                 ->color('success'),
 
-            Stat::make('Credits Deducted (This Month)', '₹' . number_format($creditsDeducted, 2))
+            Stat::make('Credits Deducted (This Month)', '$' . number_format($creditsDeducted, 2))
                 ->description('All deductions this month')
                 ->descriptionIcon('heroicon-o-arrow-down-circle')
                 ->color('danger'),
 
-            Stat::make('Net Change', '₹' . number_format($netCredits, 2))
+            Stat::make('Net Change', '$' . number_format($netCredits, 2))
                 ->description('Added - Deducted')
                 ->descriptionIcon('heroicon-o-calculator')
                 ->color($netCredits >= 0 ? 'success' : 'danger'),

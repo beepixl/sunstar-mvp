@@ -72,7 +72,7 @@ final class CreditResource extends Resource
             TextInput::make('amount')
                 ->label('Amount')
                 ->numeric()
-                ->prefix('₹')
+                ->prefix('$')
                 ->required(),
 
             Select::make('credit_type')
