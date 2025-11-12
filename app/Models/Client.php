@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
@@ -50,26 +51,37 @@ class Client extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function credits()
-{
-    return $this->hasMany(Credit::class);
-}
+    public function credits(): HasMany
+    {
+        return $this->hasMany(Credit::class);
+    }
 
+    public function createdCredits(): HasMany
+    {
+        return $this->hasMany(Credit::class, 'user_id');
+    }
 
-public function createdCredits()
-{
-    return $this->hasMany(Credit::class, 'user_id');
-}
-
-    public function approvedCredits()
+    public function approvedCredits(): HasMany
     {
         return $this->hasMany(Credit::class, 'approved_by');
     }
 
-    public function drivers()
-{
-    return $this->hasMany(Driver::class);
-}
+    public function drivers(): HasMany
+    {
+        return $this->hasMany(Driver::class);
+    }
 
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
 
+    protected static function booted(): void
+    {
+        // When a client is deleted, ensure all associated credits are deleted
+        static::deleting(function (Client $client) {
+            // Force delete credits (bypass soft deletes) when client is deleted
+            $client->credits()->withTrashed()->forceDelete();
+        });
+    }
 }
