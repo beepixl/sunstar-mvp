@@ -143,6 +143,11 @@ class Booking extends Model
         return $this->hasMany(StatusHistory::class);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     // Model events
     protected static function booted(): void
     {
@@ -187,6 +192,27 @@ class Booking extends Model
                     'changed_by' => auth()->id() ?? $booking->created_by,
                     'changed_at' => now(),
                 ]);
+                
+                // Auto-generate invoice when booking is delivered
+                if ($booking->status === 'delivered' && !$booking->invoices()->exists()) {
+                    $client = $booking->client;
+                    $currency = $client ? \App\Models\Currency::where('code', $client->currency_code)->first() : null;
+                    
+                    Invoice::create([
+                        'client_id' => $booking->client_id,
+                        'currency_code' => $client?->currency_code ?? 'USD',
+                        'exchange_rate' => $currency?->exchange_rate ?? 1,
+                        'booking_id' => $booking->id,
+                        'created_by' => auth()->id() ?? $booking->created_by,
+                        'status' => 'pending',
+                        'invoice_date' => now(),
+                        'due_date' => now()->addDays(30), // 30 days payment term
+                        'amount' => $booking->subtotal ?? 0,
+                        'tax_amount' => $booking->tax_amount ?? 0,
+                        'total_amount' => $booking->total_amount ?? 0,
+                        'amount_paid' => 0,
+                    ]);
+                }
             }
         });
         

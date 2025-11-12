@@ -14,25 +14,58 @@ class ClientsTable
     {
         return $table
             ->columns([
-                TextColumn::make('first_name')->label('First Name')->searchable(),
-                TextColumn::make('last_name')->label('Last Name')->searchable(),
-                TextColumn::make('business_name')->label('Business Name')->searchable(),
-                TextColumn::make('email')->label('Email')->searchable(),
-                TextColumn::make('preferred_city')->label('Preferred City')->searchable(),
+                TextColumn::make('business_name')
+                    ->label('Business Name')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold'),
+                TextColumn::make('first_name')
+                    ->label('First Name')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('last_name')
+                    ->label('Last Name')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable()
+                    ->copyable()
+                    ->icon('heroicon-o-envelope'),
+                TextColumn::make('currency_code')
+                    ->label('Currency')
+                    ->badge()
+                    ->color('info')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('credit_limit')
                     ->label('Credit Limit')
-                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
-                TextColumn::make('open_balance')
-                    ->label('Open Balance')
-                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
+                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2))
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('available_credit')
-                    ->label('Available Credit')
-                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
-                TextColumn::make('total_order_amount')
-                    ->label('Total Order Amount')
-                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2)),
-                TextColumn::make('tax_exempt')->label('Tax Exempt'),
-                TextColumn::make('rewards')->label('Rewards')->numeric(),
+                    ->label('Credit Available')
+                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2))
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('credit_used')
+                    ->label('Credit Used')
+                    ->state(fn ($record) => $record->credit_limit - $record->available_credit)
+                    ->formatStateUsing(fn ($state) => '$' . number_format($state, 2))
+                    ->sortable()
+                    ->toggleable()
+                    ->color(fn ($state) => $state > 0 ? 'warning' : 'success'),
+                TextColumn::make('preferred_city')
+                    ->label('City')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('tax_exempt')
+                    ->label('Tax Exempt')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('rewards')
+                    ->label('Rewards')
+                    ->numeric()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

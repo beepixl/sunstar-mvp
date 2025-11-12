@@ -22,6 +22,7 @@ class Client extends Model
         'address',
         'preferred_city',
         'email',
+        'currency_code',
         'password',
         'credit_limit',
         'open_balance',
@@ -74,6 +75,16 @@ class Client extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'currency_code', 'code');
     }
 
     protected static function booted(): void

@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\Clients\Schemas;
 
 use App\Models\Client;
+use App\Models\Currency;
 use App\Models\User;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Checkbox;
 
 class ClientForm
@@ -63,6 +65,23 @@ class ClientForm
                         },
                     ])
                     ->maxLength(255),
+
+                Select::make('currency_code')
+                    ->label('Preferred Currency')
+                    ->options(function () {
+                        return Currency::where('is_active', true)
+                            ->orderBy('code')
+                            ->get()
+                            ->mapWithKeys(fn ($currency) => [
+                                $currency->code => $currency->code . ' - ' . $currency->name . ' (' . $currency->symbol . ')'
+                            ])
+                            ->toArray();
+                    })
+                    ->default('USD')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->helperText('Currency for invoices and payments'),
 
                 TextInput::make('password')
                     ->label('Password')

@@ -17,6 +17,9 @@ class Credit extends Model
         'credit_type',
         'transaction_type',
         'amount',
+        'currency_code',
+        'original_amount',
+        'exchange_rate',
         'previous_balance',
         'new_balance',
         'reference_no',
@@ -30,10 +33,17 @@ class Credit extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'original_amount' => 'decimal:2',
+            'exchange_rate' => 'decimal:10',
             'previous_balance' => 'decimal:2',
             'new_balance' => 'decimal:2',
             'approved_at' => 'datetime',
         ];
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'currency_code', 'code');
     }
 
     public function client(): BelongsTo

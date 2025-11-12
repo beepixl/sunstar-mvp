@@ -6,6 +6,7 @@ namespace App\Filament\Resources\Credits;
 
 use App\Models\Credit;
 use App\Models\Client;
+use App\Models\Currency;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Tables;
@@ -58,7 +59,14 @@ final class CreditResource extends Resource
                 ->label('Client')
                 ->relationship('client', 'business_name')
                 ->searchable()
-                ->required(),
+                ->required()
+                ->live()
+                ->afterStateUpdated(function ($state, callable $set) {
+                    if ($state) {
+                        $client = Client::find($state);
+                        $set('currency_code', $client?->currency_code ?? 'USD');
+                    }
+                }),
 
             ToggleButtons::make('transaction_type')
                 ->options([
@@ -69,11 +77,50 @@ final class CreditResource extends Resource
                 ->required()
                 ->default('add'),
 
+            Select::make('currency_code')
+                ->label('Currency')
+                ->options(function () {
+                    return Currency::where('is_active', true)
+                        ->orderBy('code')
+                        ->get()
+                        ->mapWithKeys(fn ($currency) => [
+                            $currency->code => $currency->code . ' - ' . $currency->symbol
+                        ])
+                        ->toArray();
+                })
+                ->default('USD')
+                ->required()
+                ->searchable()
+                ->live()
+                ->helperText('Amount will be converted to USD for balance tracking'),
+
             TextInput::make('amount')
                 ->label('Amount')
                 ->numeric()
-                ->prefix('$')
-                ->required(),
+                ->required()
+                ->live(onBlur: true)
+                ->prefix(function ($get) {
+                    $currencyCode = $get('currency_code') ?? 'USD';
+                    $currency = Currency::where('code', $currencyCode)->first();
+                    return $currency?->symbol ?? '$';
+                })
+                ->helperText(function ($get) {
+                    $amount = $get('amount');
+                    $currencyCode = $get('currency_code');
+                    
+                    if (!$amount || !$currencyCode || $currencyCode === 'USD') {
+                        return null;
+                    }
+                    
+                    $currency = Currency::where('code', $currencyCode)->first();
+                    if (!$currency) {
+                        return null;
+                    }
+                    
+                    // Cast to float to avoid number_format errors
+                    $usdAmount = (float)$amount / (float)$currency->exchange_rate;
+                    return 'Equivalent: $' . number_format($usdAmount, 2) . ' USD (Rate: ' . number_format((float)$currency->exchange_rate, 4) . ')';
+                }),
 
             Select::make('credit_type')
                 ->options([
@@ -103,7 +150,28 @@ final class CreditResource extends Resource
                 TextColumn::make('client.business_name')->label('Client'),
                 TextColumn::make('transaction_type')->badge()
                     ->colors(['success' => 'add', 'danger' => 'deduct']),
-                TextColumn::make('amount')->money('inr')->sortable(),
+                TextColumn::make('original_amount')
+                    ->label('Amount')
+                    ->formatStateUsing(function ($record) {
+                        $currency = $record->currency;
+                        $amount = $record->original_amount ?? $record->amount;
+                        $symbol = $currency?->symbol ?? '$';
+                        return $symbol . number_format((float)$amount, 2);
+                    })
+                    ->sortable()
+                    ->weight('semibold')
+                    ->description(function ($record) {
+                        // Show USD equivalent for non-USD credits
+                        if ($record->currency_code !== 'USD') {
+                            // Use the stored USD amount (already converted)
+                            return '$' . number_format((float)$record->amount, 2) . ' USD';
+                        }
+                        return null;
+                    }),
+                TextColumn::make('currency_code')
+                    ->label('Currency')
+                    ->badge()
+                    ->color('info'),
                 TextColumn::make('credit_type')->sortable(),
                 TextColumn::make('reference_no'),
                 TextColumn::make('approvedBy.name')->label('Approved By'),
